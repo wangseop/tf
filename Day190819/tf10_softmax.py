@@ -34,7 +34,7 @@ hypothesis = tf.nn.softmax(tf.matmul(X, W) +b)
 #  └ nn == neural network
 
 # cross entropy cost/ loss
-cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(hypothesis), axis=1))
+cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(hypothesis), axis=1))       # axis=1 이므로 행단위로 합
 # └ categorical crossentropy의 계산식
 #   └  그래서  Keras 의 loss로 들어간다.
 
