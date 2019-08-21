@@ -6,6 +6,21 @@ tf.set_random_seed(777)     # for reproducibility
 
 from tensorflow.examples.tutorials.mnist import input_data
 
+def create_sigmoid_layer(pre_layer=None, input_dim=None, output_dim=None, weight_name="weight", bias_name="bias"):
+    W = tf.Variable(tf.random_normal([input_dim, output_dim]), name=weight_name)
+    b = tf.Variable(tf.random_normal([output_dim]), name=bias_name)
+    layer = tf.sigmoid(tf.matmul(pre_layer, W) + b)
+
+    return layer, output_dim
+
+def create_relu_layer(pre_layer=None, input_dim=None, output_dim=None, weight_name="weight", bias_name="bias"):
+    W = tf.Variable(tf.random_normal([input_dim, output_dim]), name=weight_name)
+    b = tf.Variable(tf.random_normal([output_dim]), name=bias_name)
+    layer = tf.sigmoid(tf.matmul(pre_layer, W) + b)
+
+    return layer, output_dim
+
+
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 # print(mnist.train.images)
@@ -20,14 +35,32 @@ mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 X = tf.placeholder(tf.float32, shape=[None, 28*28])
 Y = tf.placeholder(tf.float32, shape=[None, 10])
 
-W = tf.Variable(tf.random_normal([28*28, 10]), name="weight")
-b = tf.Variable(tf.random_normal([10]), name="bias")
 
-hypothesis = tf.nn.softmax(tf.matmul(X, W) + b)
+layer1, next_input_dim = create_relu_layer(X, 28*28, 10, weight_name="weight1", bias_name="bias1")
+layer2, next_input_dim = create_relu_layer(layer1, next_input_dim, 10, weight_name="weight2", bias_name="bias2")
+layer2 = tf.nn.dropout(layer2, keep_prob=0.2)
+layer3, next_input_dim = create_relu_layer(layer2, next_input_dim, 20, weight_name="weight3", bias_name="bias3")
+layer4, next_input_dim = create_relu_layer(layer3, next_input_dim, 20, weight_name="weight4", bias_name="bias4")
+layer5, next_input_dim = create_relu_layer(layer4, next_input_dim, 20, weight_name="weight5", bias_name="bias5")
+layer5 = tf.nn.dropout(layer5, keep_prob=0.2)
+layer6, next_input_dim = create_relu_layer(layer5, next_input_dim, 25, weight_name="weight6", bias_name="bias6")
+layer7, next_input_dim = create_relu_layer(layer6, next_input_dim, 25, weight_name="weight7", bias_name="bias7")
+layer8, next_input_dim = create_relu_layer(layer7, next_input_dim, 25, weight_name="weight8", bias_name="bias8")
+layer8 = tf.nn.dropout(layer8, keep_prob=0.2)
+layer9, next_input_dim = create_relu_layer(layer8, next_input_dim, 30, weight_name="weight9", bias_name="bias9")
+layer10, next_input_dim = create_relu_layer(layer9, next_input_dim, 30, weight_name="weight10", bias_name="bias10")
+layer11, next_input_dim = create_relu_layer(layer10, next_input_dim, 30, weight_name="weight11", bias_name="bias11")
+layer11 = tf.nn.dropout(layer11, keep_prob=0.2)
+
+W = tf.Variable(tf.random_normal([next_input_dim, 10]), name="weight_last")
+b = tf.Variable(tf.random_normal([10]), name="bias_last")
+hypothesis = tf.nn.softmax(tf.matmul(layer11, W) + b)
+
+
 
 cost = tf.reduce_mean(-tf.reduce_sum(Y * tf.log(hypothesis), axis=1)) 
-# train  = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(cost)
-train  = tf.train.AdamOptimizer(learning_rate=2.763e-4).minimize(cost)
+train  = tf.train.GradientDescentOptimizer(learning_rate=0.2).minimize(cost)
+# train  = tf.train.AdamOptimizer(learning_rate=2.763e-4).minimize(cost)
 
 # Test Model
 is_correct = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y, 1))

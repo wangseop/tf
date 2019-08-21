@@ -1,6 +1,13 @@
 import tensorflow as tf
 import numpy as np
 
+def create_layer(pre_layer=None, input_dim=None, output_dim=None, weight_name="weight", bias_name="bias"):
+    W = tf.Variable(tf.random_normal([input_dim, output_dim]), name=weight_name)
+    b = tf.Variable(tf.random_normal([output_dim]), name=bias_name)
+    layer = tf.sigmoid(tf.matmul(pre_layer, W) + b)
+
+    return layer, output_dim
+
 tf.set_random_seed(777)
 
 x_data = np.array([[0,0], [0,1], [1,0], [1,1]], dtype=np.float32)
@@ -64,15 +71,17 @@ layer7 = tf.nn.relu(tf.matmul(layer6, W7) + b7)
 
 W8 = tf.Variable(tf.random_normal([80, 90]), name='weight8')
 b8 = tf.Variable(tf.random_normal([90]), name='bias8')
-layer8 = tf.nn.relu(tf.matmul(layer7, W8) + b8)
+layer8 = tf.matmul(layer7, W8) + b8
 
 W9 = tf.Variable(tf.random_normal([90, 100]), name='weight9')
 b9 = tf.Variable(tf.random_normal([100]), name='bias9')
 layer9 = tf.sigmoid(tf.matmul(layer8, W9) + b9)
 
-W10 = tf.Variable(tf.random_normal([100, 1]), name='weight10')
+layer_func = create_layer(pre_layer=layer9, input_dim=100, output_dim=110, weight_name="weight_func", bias_name="bias_func")
+
+W10 = tf.Variable(tf.random_normal([110, 1]), name='weight10')
 b10 = tf.Variable(tf.random_normal([1]), name='bias10')
-hypothesis = tf.sigmoid(tf.matmul(layer9, W10) + b10)
+hypothesis = tf.sigmoid(tf.matmul(layer_func, W10) + b10)
 
 
 cost = -tf.reduce_mean(Y * tf.log(hypothesis) + (1 - Y)*tf.log(1-hypothesis))
